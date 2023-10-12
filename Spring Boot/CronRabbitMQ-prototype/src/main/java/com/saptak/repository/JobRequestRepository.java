@@ -1,13 +1,13 @@
 package com.saptak.repository;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.saptak.model.JobRequest;
 
+@Repository
 public interface JobRequestRepository extends JpaRepository<JobRequest, Integer> {
 
-	List<JobRequest> findAllByStatusCode(String statusCode);
+	JobRequest findFirstByStatusCodeOrderByJbrInsertTms(String statusCode);
 
 }

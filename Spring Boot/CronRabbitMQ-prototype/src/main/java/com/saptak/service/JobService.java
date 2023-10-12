@@ -1,7 +1,6 @@
 package com.saptak.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +20,19 @@ public class JobService {
 		request.setJbrUpdateTms(LocalDateTime.now());
 		return jobRequestRepository.save(request);
 	}
-	
-	public List<JobRequest> fetchAllJobsForStatus(String statusCode){
-		return jobRequestRepository.findAllByStatusCode(statusCode);
+
+	public JobRequest fetchOldestPendingJobRequest() {
+		return jobRequestRepository.findFirstByStatusCodeOrderByJbrInsertTms("P");
+	}
+
+	public JobRequest lockJobRequestStatus(JobRequest request) {
+		request.setJbrUpdateTms(LocalDateTime.now());
+		request.setStatusCode("I");
+		request.setJbrUpdateOperId("SYSTEM");
+		return jobRequestRepository.save(request);
+	}
+
+	public JobRequest updateJobRequest(JobRequest request) {
+		return jobRequestRepository.save(request);
 	}
 }
