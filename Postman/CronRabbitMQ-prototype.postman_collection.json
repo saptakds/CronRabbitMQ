@@ -1,0 +1,39 @@
+{
+	"info": {
+		"_postman_id": "cba7b5f3-2baa-4e35-995e-40214bd8305f",
+		"name": "CronRabbitMQ-prototype",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1152573"
+	},
+	"item": [
+		{
+			"name": "Create Job",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"statusCode\": \"P\",\n    \"emailAddres\": \"saptak.das@express-scripts.com\",\n    \"jbrInsertOperId\": \"C7M7VZ\",\n    \"category\": \"All Rules By Client\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/job/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"job",
+						"create"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

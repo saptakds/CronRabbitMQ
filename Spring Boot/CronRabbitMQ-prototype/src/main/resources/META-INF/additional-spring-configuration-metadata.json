@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "cron.execution.switch",
+    "type": "java.lang.Boolean",
+    "description": "Switch to control cron job"
+  },
+  {
+    "name": "cron.expression.interval",
+    "type": "java.lang.String",
+    "description": "Cron expression defining cron interval"
+  }
+]}
