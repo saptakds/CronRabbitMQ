@@ -1,5 +1,7 @@
 package com.saptak.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +19,7 @@ public class JobController {
 	private JobService jobService;
 	
 	@PostMapping("/create")
-	public JobRequest createJobRequest(@RequestBody JobRequest request) {
+	public JobRequest createJobRequest(@RequestBody JobRequest request) throws IOException {
 		return jobService.createJobRequestService(request);
 	}
 	

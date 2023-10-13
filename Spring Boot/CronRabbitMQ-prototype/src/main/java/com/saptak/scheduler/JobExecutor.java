@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,20 @@ public class JobExecutor {
 		LOGGER.info("Calling DB -- Fetching oldest pending request");
 		JobRequest jobRequest = jobService.fetchOldestPendingJobRequest();
 
+		startJobProcessing(jobRequest);
+
+	}
+
+	@RabbitListener(queues = "JbrQueue")
+	public void getPendingJobRequestFromQueue(@Payload JobRequest jobRequest) {
+
+		System.out.println("Object----->" + jobRequest);
+
+//		startJobProcessing(jobRequest);
+	}
+
+	private void startJobProcessing(JobRequest jobRequest) throws InterruptedException {
+
 		LOGGER.info("Locking Job ID: {}", jobRequest.getJobId());
 		JobRequest lockedJobRequest = jobService.lockJobRequestStatus(jobRequest);
 
@@ -49,5 +65,6 @@ public class JobExecutor {
 		lockedJobRequest.setJbrUpdateTms(LocalDateTime.now());
 		lockedJobRequest.setJbrUpdateOperId("SYSTEM");
 		jobService.updateJobRequest(lockedJobRequest);
+
 	}
 }

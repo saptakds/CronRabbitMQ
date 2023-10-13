@@ -1,5 +1,6 @@
 package com.saptak.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -11,7 +12,7 @@ import lombok.Data;
 @Entity
 @Table(name = "optjbr00")
 @Data
-public class JobRequest {
+public class JobRequest implements Serializable {
 
 	@Id
 	@GeneratedValue
