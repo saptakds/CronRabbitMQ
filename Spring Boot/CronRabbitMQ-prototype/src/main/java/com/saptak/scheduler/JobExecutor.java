@@ -2,15 +2,18 @@ package com.saptak.scheduler;
 
 import java.time.LocalDateTime;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saptak.model.JobRequest;
 import com.saptak.service.JobService;
 
@@ -24,6 +27,9 @@ public class JobExecutor {
 
 	@Autowired
 	private JobService jobService;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Scheduled(cron = "${cron.expression.interval}")
 	void executePendingJobs() throws InterruptedException {
@@ -40,11 +46,12 @@ public class JobExecutor {
 	}
 
 	@RabbitListener(queues = "JbrQueue")
-	public void getPendingJobRequestFromQueue(@Payload JobRequest jobRequest) {
+	public void getPendingJobRequestFromQueue(JSONObject jsonRequest)
+			throws JsonMappingException, JsonProcessingException, InterruptedException {
 
-		System.out.println("Object----->" + jobRequest);
+		JobRequest jobRequest = objectMapper.readValue(jsonRequest.toString(), JobRequest.class);
 
-//		startJobProcessing(jobRequest);
+		startJobProcessing(jobRequest);
 	}
 
 	private void startJobProcessing(JobRequest jobRequest) throws InterruptedException {

@@ -3,8 +3,7 @@ package com.saptak.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageBuilder;
+import org.json.JSONObject;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,17 +20,15 @@ public class JobService {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private MessageService messageService;
-
 	public JobRequest createJobRequestService(JobRequest request) throws IOException {
 		request.setJbrUpdateOperId(request.getJbrInsertOperId());
 		request.setJbrInsertTms(LocalDateTime.now());
 		request.setJbrUpdateTms(LocalDateTime.now());
+
 		JobRequest createdJobRequest = jobRequestRepository.save(request);
-//		Message message = MessageBuilder.withBody(messageService.messageInByteArray(createdJobRequest)).build();
-//		rabbitTemplate.send("JbrQueue", message);
-		rabbitTemplate.convertAndSend("JbrQueue", request);
+
+		JSONObject requestJson = new JSONObject(createdJobRequest);
+		rabbitTemplate.convertAndSend("JbrQueue", requestJson.toString());
 		return createdJobRequest;
 	}
 
