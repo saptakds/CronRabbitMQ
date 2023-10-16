@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saptak.model.JobRequest;
 import com.saptak.service.JobService;
@@ -47,10 +46,12 @@ public class JobExecutor {
 
 	@RabbitListener(queues = "JbrQueue")
 	public void getPendingJobRequestFromQueue(JSONObject jsonRequest)
-			throws JsonMappingException, JsonProcessingException, InterruptedException {
+			throws JsonProcessingException, InterruptedException {
 
+		LOGGER.info("Received a pending job request from RabbitMQ: {}", jsonRequest);
 		JobRequest jobRequest = objectMapper.readValue(jsonRequest.toString(), JobRequest.class);
 
+		LOGGER.info("Job Request ready to process: {}", jobRequest);
 		startJobProcessing(jobRequest);
 	}
 
