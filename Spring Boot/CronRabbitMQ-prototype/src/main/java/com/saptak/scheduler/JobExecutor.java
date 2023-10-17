@@ -1,18 +1,21 @@
 package com.saptak.scheduler;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.Channel;
+import com.saptak.constant.ConstantValues;
 import com.saptak.model.JobRequest;
 import com.saptak.service.JobService;
 
@@ -44,15 +47,19 @@ public class JobExecutor {
 
 	}
 
-	@RabbitListener(queues = "JbrQueue",autoStartup = "${rabbitlistener.enabled}")
-	public void getPendingJobRequestFromQueue(JSONObject jsonRequest)
-			throws JsonProcessingException, InterruptedException {
+	@RabbitListener(queues = ConstantValues.JOB_QUEUE_NAME, autoStartup = "${rabbitlistener.enabled}", ackMode = "MANUAL")
+	public void getPendingJobRequestFromQueue(Message message, Channel channel)
+			throws InterruptedException, IOException {
+
+		JSONObject jsonRequest = new JSONObject(new String(message.getBody()));
 
 		LOGGER.info("Received a pending job request from RabbitMQ: {}", jsonRequest);
 		JobRequest jobRequest = objectMapper.readValue(jsonRequest.toString(), JobRequest.class);
 
 		LOGGER.info("Job Request ready to process: {}", jobRequest);
 		startJobProcessing(jobRequest);
+
+		channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 	}
 
 	private void startJobProcessing(JobRequest jobRequest) throws InterruptedException {
@@ -69,9 +76,9 @@ public class JobExecutor {
 		LOGGER.info("Job {} execution ends<===", lockedJobRequest.getJobId());
 
 		LOGGER.info("Completing Job ID: {}", lockedJobRequest.getJobId());
-		lockedJobRequest.setStatusCode("C");
+		lockedJobRequest.setStatusCode(ConstantValues.JOB_STATUS_CODE_COMPLETED);
 		lockedJobRequest.setJbrUpdateTms(LocalDateTime.now());
-		lockedJobRequest.setJbrUpdateOperId("SYSTEM");
+		lockedJobRequest.setJbrUpdateOperId(ConstantValues.SYSTEM_OPERATOR_ID);
 		jobService.updateJobRequest(lockedJobRequest);
 
 	}
