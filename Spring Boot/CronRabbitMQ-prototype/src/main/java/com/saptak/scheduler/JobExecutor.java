@@ -44,7 +44,7 @@ public class JobExecutor {
 
 	}
 
-	@RabbitListener(queues = "JbrQueue")
+	@RabbitListener(queues = "JbrQueue",autoStartup = "${rabbitlistener.enabled}")
 	public void getPendingJobRequestFromQueue(JSONObject jsonRequest)
 			throws JsonProcessingException, InterruptedException {
 
